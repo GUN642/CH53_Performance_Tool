@@ -3,7 +3,7 @@
 //
 // CACHE_VERSION bei jedem inhaltlichen Update der Datei(en) hochzählen — das erzeugt
 // automatisch einen neuen Cache-Namen, alte Caches werden beim Aktivieren gelöscht.
-const CACHE_VERSION = 'v3.9.0';
+const CACHE_VERSION = 'v3.10.0';
 const APP_CACHE = 'ch53-app-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'ch53-runtime-' + CACHE_VERSION;
 
