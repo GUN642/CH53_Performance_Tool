@@ -3,7 +3,7 @@
 //
 // CACHE_VERSION bei jedem inhaltlichen Update der Datei(en) hochzählen — das erzeugt
 // automatisch einen neuen Cache-Namen, alte Caches werden beim Aktivieren gelöscht.
-const CACHE_VERSION = 'v3.18.0';
+const CACHE_VERSION = 'v3.19.0';
 const APP_CACHE = 'ch53-app-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'ch53-runtime-' + CACHE_VERSION;
 
@@ -55,7 +55,9 @@ async function precacheFonts(cache) {
 self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
-      caches.open(APP_CACHE).then((cache) => cache.addAll(APP_SHELL)),
+      // cache: 'reload' umgeht den HTTP-Cache des Browsers, damit nach einem Update
+      // wirklich die neue index.html im App-Cache landet und nicht die alte.
+      caches.open(APP_CACHE).then((cache) => cache.addAll(APP_SHELL.map((u) => new Request(u, { cache: 'reload' })))),
       caches.open(RUNTIME_CACHE).then((cache) => precacheFonts(cache))
     ]).then(() => self.skipWaiting())
   );
@@ -83,7 +85,8 @@ self.addEventListener('fetch', (event) => {
   // Seitenaufrufe (Navigation): online = neueste Version holen, offline = aus dem Cache.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      // no-cache: immer beim Server nachfragen (GitHub Pages cacht sonst bis zu 10 min).
+      fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
         .then((res) => {
           const copy = res.clone();
           caches.open(APP_CACHE).then((c) => c.put('./index.html', copy));
